@@ -1,2 +1,2 @@
-# EAD2.0
-EAD2.0
+# opensearch-minio
+opensearch-minio for EAD2.0

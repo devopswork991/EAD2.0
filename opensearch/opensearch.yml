@@ -1,0 +1,45 @@
+cluster.name: os-cluster
+network.host: 0.0.0.0
+
+bootstrap.memory_lock: "true" # along with the memlock settings below, disables swapping
+
+cluster.routing.allocation.disk.threshold_enabled: true
+cluster.routing.allocation.disk.watermark.low: 93%
+cluster.routing.allocation.disk.watermark.high: 95%
+
+plugins.security.allow_unsafe_democertificates: true
+plugins.security.ssl.http.enabled: true
+plugins.security.ssl.http.pemtrustedcas_filepath: certificates/ca/ca.pem
+plugins.security.ssl.transport.enabled: true
+plugins.security.ssl.transport.pemtrustedcas_filepath: certificates/ca/ca.pem
+plugins.security.ssl.transport.enforce_hostname_verification: false
+#
+#plugins.security.ssl.transport.truststore_type: PKCS12/PFX
+#plugins.security.ssl.transport.truststore_filepath: /usr/share/opensearch/config/certificates/keycloak/shell.pfx
+#plugins.security.ssl.transport.truststore_password: changeit
+#plugins.security.ssl.transport.truststore_filepath: /usr/share/opensearch/config/certificates/root_pem_globalsign_ssl_dv_wildcard_1.crt
+
+#plugins.security.ssl.transport.truststore_type: PKCS12/PFX  
+#plugins.security.ssl.transport.truststore_filepath: certificates/keycloak/shell.pfx
+### (Static): When set to true, OpenSearch Security will automatically initialize the configuration index with the files in the /config directory if the index does not exist.
+
+plugins.security.allow_default_init_securityindex: true
+
+
+### plugins.security.authcz.admin_dn (Static): Defines the DNs of certificates to which admin privileges should be assigned. Required.
+plugins.security.authcz.admin_dn:
+  - 'CN=ADMIN,O=EXAMPLE,L=PARIS,ST=IDF,C=FR'
+### plugins.security.nodes_dn (Static): Specifies a list of distinguished names (DNs) that denote the other nodes in the cluster. 
+### This setting supports wildcards and regular expressions. The list of DNs are also read from the security index in addition to the YAML configuration when plugins.security.nodes_dn_dynamic_config_enabled is true.  
+plugins.security.nodes_dn:
+  - 'CN=os00,O=EXAMPLE,L=PARIS,ST=IDF,C=FR'
+  - 'CN=os01,O=EXAMPLE,L=PARIS,ST=IDF,C=FR'
+  - 'CN=os02,O=EXAMPLE,L=PARIS,ST=IDF,C=FR'
+  - 'CN=os03,O=EXAMPLE,L=PARIS,ST=IDF,C=FR'
+  - 'CN=os04,O=EXAMPLE,L=PARIS,ST=IDF,C=FR'
+  - 'CN=os05,O=EXAMPLE,L=PARIS,ST=IDF,C=FR'
+  - 'CN=os06,O=EXAMPLE,L=PARIS,ST=IDF,C=FR'
+  - 'CN=os07,O=EXAMPLE,L=PARIS,ST=IDF,C=FR'
+
+plugins.security.restapi.admin.enabled: true
+plugins.security.restapi.roles_enabled: [ "all_access", "security_rest_api_access" ]

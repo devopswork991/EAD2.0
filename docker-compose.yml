@@ -1,0 +1,179 @@
+version: '3.7'
+
+services:
+  os01:
+#    restart: always
+    image: opensearchproject/opensearch:latest
+    container_name: os011
+    environment:
+      OPENSEARCH_JAVA_OPTS: "-Xms1024m -Xmx1024m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+      node.name: os01
+      discovery.seed_hosts: os01,os02,os03
+      cluster.initial_master_nodes: os01,os02,os03
+      plugins.security.ssl.transport.pemkey_filepath: certificates/os01/os01.key # relative path
+      plugins.security.ssl.transport.pemcert_filepath: certificates/os01/os01.pem
+      plugins.security.ssl.http.pemkey_filepath: certificates/os01/os01.key
+      plugins.security.ssl.http.pemcert_filepath: certificates/os01/os01.pem
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      JAVA_HOME: /usr/share/opensearch/jdk
+      bootstrap.memory_lock: "true" # along with the memlock settings below, disables swapping
+      network.host: "0.0.0.0"
+    ulimits: 
+      memlock:
+        soft: -1
+        hard: -1
+    depends_on:
+      - keycloak_web
+    volumes:
+      - "os-data1:/usr/share/opensearch/data"
+      - "./opensearch/certs:/usr/share/opensearch/config/certificates:ro"
+      - "./opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml"
+      - "./opensearch/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml"  ### mount config file for OS
+      - "./opensearch/log4j2.properties:/usr/share/opensearch/config/log4j2.properties" ### added trace logs for diagnostics
+      - "./opensearch/hosts:/etc/hosts"
+#     - "./opensearch/cacerts2:/usr/share/opensearch/jdk/lib/security/cacerts"
+      - "/etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "1"
+    ports:
+      - 9202:9200
+      - 9602:9600 # required for Performance Analyzer
+  
+  os02:
+#    restart: always
+    image: opensearchproject/opensearch:latest
+    container_name: os021
+    environment:
+      OPENSEARCH_JAVA_OPTS: "-Xms1024m -Xmx1024m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+      node.name: os02
+      discovery.seed_hosts: os01,os02,os03
+      cluster.initial_master_nodes: os01,os02,os03
+      plugins.security.ssl.transport.pemkey_filepath: certificates/os02/os02.key # relative path
+      plugins.security.ssl.transport.pemcert_filepath: certificates/os02/os02.pem
+      plugins.security.ssl.http.pemkey_filepath: certificates/os02/os02.key
+      plugins.security.ssl.http.pemcert_filepath: certificates/os02/os02.pem
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      JAVA_HOME: /usr/share/opensearch/jdk
+      bootstrap.memory_lock: "true" # along with the memlock settings below, disables swapping
+      network.host: "0.0.0.0"
+    ulimits: 
+      memlock:
+        soft: -1
+        hard: -1
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "1"
+    depends_on:
+      - keycloak_web
+    volumes:
+      - "os-data2:/usr/share/opensearch/data"
+      - "./opensearch/certs:/usr/share/opensearch/config/certificates:ro"
+      - "./opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml"
+      - "./opensearch/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml"  ### mount config file for OS
+      - "./opensearch/log4j2.properties:/usr/share/opensearch/config/log4j2.properties" ### added trace logs for diagnostics
+      - "./opensearch/hosts:/etc/hosts"
+#     - "./opensearch/cacerts2:/usr/share/opensearch/jdk/lib/security/cacerts"
+      - "/etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt"
+  os03:
+#    restart: always
+    image: opensearchproject/opensearch:latest
+    container_name: os031
+    environment:
+      OPENSEARCH_JAVA_OPTS: "-Xms1024m -Xmx1024m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+      node.name: os03
+      discovery.seed_hosts: os01,os02,os03
+      cluster.initial_master_nodes: os01,os02,os03
+      plugins.security.ssl.transport.pemkey_filepath: certificates/os03/os03.key # relative path
+      plugins.security.ssl.transport.pemcert_filepath: certificates/os03/os03.pem
+      plugins.security.ssl.http.pemkey_filepath: certificates/os03/os03.key
+      plugins.security.ssl.http.pemcert_filepath: certificates/os03/os03.pem
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      JAVA_HOME: /usr/share/opensearch/jdk
+      bootstrap.memory_lock: "true" # along with the memlock settings below, disables swapping
+      network.host: "0.0.0.0"
+    ulimits: 
+      memlock:
+        soft: -1
+        hard: -1
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "1"
+    depends_on:
+      - keycloak_web
+    volumes:
+      - "os-data3:/usr/share/opensearch/data"
+      - "./opensearch/certs:/usr/share/opensearch/config/certificates:ro"
+      - "./opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml"
+      - "./opensearch/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml"  ### mount config file for OS
+      - "./opensearch/log4j2.properties:/usr/share/opensearch/config/log4j2.properties" ### added trace logs for diagnostics
+      - "./opensearch/hosts:/etc/hosts"
+#     - "./opensearch/cacerts2:/usr/share/opensearch/jdk/lib/security/cacerts"
+      - "/etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt"
+  kibana:
+#    restart: always
+    image: opensearchproject/opensearch-dashboards:latest
+    container_name: kibana1
+    environment:
+      OPENSEARCH_HOSTS: '["https://os01:9200","https://os02:9200","https://os03:9200"]' # must be a string with no spaces when specified as an environment variable
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "1"
+    depends_on:
+      - keycloak_web
+    volumes:
+      - "./opensearch/certs:/usr/share/opensearch-dashboards/config/certificates"
+      - "./opensearch/opensearch-dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml"
+      - "./opensearch/hosts:/etc/hosts"
+      - "/etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt"
+    ports:
+      - 5603:5601
+  
+  keycloak_web:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak_web
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloakdb:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: password
+      KC_HOSTNAME: keycloak-ead.rdtex.msk.ru
+      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/demo/certs/tls.crt
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/demo/certs/tls.key
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    command: start-dev
+    depends_on:
+      - keycloakdb
+    hostname: keycloak-ead.rdtex.msk.ru  
+    ports:
+      - 8844:8443
+    volumes:
+     - ./keycloak/certs:/opt/keycloak/demo/certs
+
+  keycloakdb:
+    container_name: keycloak_db
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+
+## By default this config uses default local driver,
+## For custom volumes replace with volume driver configuration.
+volumes:
+  os-data1:
+  os-data2:
+  os-data3:
+  postgres_data:

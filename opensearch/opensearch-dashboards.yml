@@ -1,0 +1,34 @@
+server.name: os_dashboards
+server.host: "0.0.0.0"
+
+opensearch.username: "admin"
+opensearch.password: "admin"
+
+# Encrypt traffic between the browser and OpenSearch-Dashboards
+server.ssl.enabled: true
+server.ssl.certificate: "/usr/share/opensearch-dashboards/config/certificates/os-dashboards/os-dashboards.pem"
+server.ssl.key: "/usr/share/opensearch-dashboards/config/certificates/os-dashboards/os-dashboards.key"
+
+# Encrypt traffic between OpenSearch-Dashboards and Opensearch
+opensearch.ssl.certificateAuthorities: ["/usr/share/opensearch-dashboards/config/certificates/ca/ca.pem"]
+opensearch.ssl.verificationMode: none
+
+# Enable OpenID authentication
+#opensearch_security.auth.type: "openid"  ### Only OpenID auth
+opensearch_security.auth.type: ["basicauth","openid"]
+opensearch_security.auth.multiple_auth_enabled: true
+
+# The IdP metadata endpoint
+opensearch_security.openid.connect_url: "https://keycloak-ead.rdtex.msk.ru:8844/realms/ead/.well-known/openid-configuration"
+# The ID of the OpenID Connect client in your IdP
+opensearch_security.openid.client_id: "opensearch"
+# The client secret of the OpenID Connect client
+opensearch_security.openid.client_secret: "OxTJAlm9FCPswuMoQcfZRUhTrJwj6TE1"
+
+# mTLS Options for obtaining endpoints from IdP
+opensearch_security.openid.root_ca: "/usr/share/opensearch-dashboards/config/certificates/ca/ca.pem"
+opensearch_security.openid.base_redirect_url: https://shell-app.rdtex.msk.ru:5603
+opensearch_security.openid.verify_hostnames: "false"
+
+# allowlist basic headers and multi-tenancy header
+# opensearch.requestHeadersAllowlist: ["Authorization", "securitytenant"]
